@@ -12,7 +12,7 @@ var router = require('osprey-router');
 var finalhandler = require('finalhandler');
 var handler = require('./');
 
-describe('osprey resource handler', function () {
+describe('osprey resources', function () {
   function success (req, res) {
     res.end('success');
   }
