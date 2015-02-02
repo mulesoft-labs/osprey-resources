@@ -26,7 +26,7 @@ function createResources (resources, uri) {
     app.use(path, params, createResource(resource, uri));
   });
 
-  app.use(function (req, res, next) {
+  app.use(function ospreyResourceFilter (req, res, next) {
     if (req.resourcePath) {
       return next();
     }
@@ -50,7 +50,7 @@ function createResource (resource, uri) {
   var resources = resource.resources;
   var relativeUri = uri + (resource.relativeUri || '');
 
-  function route (req, res, next) {
+  function ospreyResource (req, res, next) {
     req.resourcePath = relativeUri;
 
     return next();
@@ -58,7 +58,7 @@ function createResource (resource, uri) {
 
   if (methods) {
     methods.forEach(function (method) {
-      app[method.method]('/', route, handler(method));
+      app[method.method]('/', ospreyResource, handler(method));
     });
   }
 
