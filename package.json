@@ -37,6 +37,6 @@
   "dependencies": {
     "http-errors": "^1.2.8",
     "osprey-method-handler": "^0.1.0",
-    "osprey-router": "0.0.4"
+    "osprey-router": "^0.0.5"
   }
 }
