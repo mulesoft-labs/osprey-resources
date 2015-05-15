@@ -1,35 +1,26 @@
 /* global describe, it */
 
-/* istanbul ignore next */
-if (!global.Promise) {
-  require('es6-promise').polyfill();
-}
+require('es6-promise').polyfill();
 
 var expect = require('chai').expect;
 var popsicle = require('popsicle');
 var server = require('popsicle-server');
 var router = require('osprey-router');
 var finalhandler = require('finalhandler');
-var handler = require('./');
+var resources = require('./');
 
 describe('osprey resources', function () {
-  function success (req, res) {
-    res.end('success');
-  }
-
   it('should reject undefined resources', function () {
     var app = router();
 
-    app.use(handler([
+    app.use(resources([
       {
         relativeUri: '/users',
         methods: [{
           method: 'get'
         }]
       }
-    ]));
-
-    app.get('/unknown', success);
+    ], success));
 
     return popsicle('/unknown')
       .use(server(createServer(app)))
@@ -41,16 +32,14 @@ describe('osprey resources', function () {
   it('should accept defined resources', function () {
     var app = router();
 
-    app.use(handler([
+    app.use(resources([
       {
         relativeUri: '/users',
         methods: [{
           method: 'get'
         }]
       }
-    ]));
-
-    app.get('/users', success);
+    ], success));
 
     return popsicle('/users')
       .use(server(createServer(app)))
@@ -63,7 +52,7 @@ describe('osprey resources', function () {
   it('should support nested resources', function () {
     var app = router();
 
-    app.use(handler([
+    app.use(resources([
       {
         relativeUri: '/users',
         resources: [{
@@ -73,9 +62,7 @@ describe('osprey resources', function () {
           }]
         }]
       }
-    ]));
-
-    app.get('/users/{userId}', success);
+    ], success));
 
     return popsicle('/users/123')
       .use(server(createServer(app)))
@@ -89,5 +76,11 @@ describe('osprey resources', function () {
 function createServer (router) {
   return function (req, res) {
     return router(req, res, finalhandler(req, res));
+  };
+}
+
+function success () {
+  return function (req, res) {
+    res.end('success');
   };
 }

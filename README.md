@@ -5,11 +5,11 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-Automatically support [RAML resources](https://github.com/raml-org/raml-spec/blob/master/raml-0.8.md#resources-and-nested-resources).
+Iterate over [RAML resources](https://github.com/raml-org/raml-spec/blob/master/raml-0.8.md#resources-and-nested-resources) and generate a middleware router.
 
 ## Installation
 
-```sh
+```
 npm install osprey-resources --save
 ```
 
@@ -17,29 +17,30 @@ npm install osprey-resources --save
 
 ```js
 var express = require('express');
-var handler = require('osprey-resources');
+var resources = require('osprey-resources');
 var app = express();
 
-app.use(handler([{
-  relativeUri: '/users',
-  methods: [{
-    method: 'post',
-    body: {
-      'application/json': {
-        schema: '...'
+app.use(resources(
+  [{
+    relativeUri: '/users',
+    methods: [{
+      method: 'post',
+      body: {
+        'application/json': {
+          schema: '...'
+        }
       }
+    }]
+  }],
+  function (method, url) {
+    return function (req, res, next) {
+      res.end('hello, world!')
     }
-  }]
-}]))
-
-app.post('/users', function (req, res) {
-  res.send('success');
-});
-
-app.get('/users', function (req, res) {
-  //=> Never reached since the route isn't defined.
-});
+  }
+));
 ```
+
+The resources function accepts two arguments. The array of resources from RAML and a function that will generate the routes for that path.
 
 ## License
 
