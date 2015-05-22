@@ -26,6 +26,10 @@ function ospreyResources (resources, handler) {
 function createResources (resources, uri, handler) {
   var app = router();
 
+  if (!resources) {
+    return app;
+  }
+
   resources.forEach(function (resource) {
     var path = resource.relativeUri;
     var params = resource.uriParameters;
