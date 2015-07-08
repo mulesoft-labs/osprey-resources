@@ -27,6 +27,22 @@ describe('osprey resources', function () {
       })
   })
 
+  it('should receive path', function (done) {
+    resources([{
+      relativeUri: '/users',
+      methods: [{
+        method: 'post'
+      }]
+    }], function (method, path) {
+      expect(path).to.equal('/users')
+      expect(method.method).to.equal('post')
+
+      done()
+
+      return function () {}
+    })
+  })
+
   it('should accept defined resources', function () {
     var app = router()
 
