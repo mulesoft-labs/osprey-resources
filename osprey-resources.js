@@ -13,28 +13,25 @@ module.exports = ospreyResources
  * @return {Function}
  */
 function ospreyResources (resources, handler) {
-  return createResources(resources, '', handler)
+  return createResources(router(), resources, '', handler)
 }
 
 /**
  * Create a middleware router that handles the resource.
  *
+ * @param  {Function} app
  * @param  {Array}    resources
- * @param  {String}   uri
+ * @param  {String}   prefix
+ * @param  {Function} handler
  * @return {Function}
  */
-function createResources (resources, uri, handler) {
-  var app = router()
-
-  if (!resources) {
+function createResources (app, resources, prefix, handler) {
+  if (!Array.isArray(resources)) {
     return app
   }
 
   resources.forEach(function (resource) {
-    var path = resource.relativeUri
-    var params = resource.uriParameters
-
-    app.use(path, params, createResource(resource, uri, handler))
+    createResource(app, resource, prefix, handler)
   })
 
   return app
@@ -43,24 +40,27 @@ function createResources (resources, uri, handler) {
 /**
  * Create middleware for a single RAML resource and recursively nest children.
  *
+ * @param  {Function} app
  * @param  {Object}   resource
- * @param  {String}   uri
+ * @param  {String}   prefix
+ * @param  {Function} handler
  * @return {Function}
  */
-function createResource (resource, uri, handler) {
-  var app = router()
+function createResource (app, resource, prefix, handler) {
   var methods = resource.methods
   var resources = resource.resources
-  var relativeUri = uri + (resource.relativeUri || '')
+  var params = resource.uriParameters
+  var path = prefix + (resource.relativeUri || '')
 
   if (methods) {
+    // TODO: Exit routers when handled: pillarjs/router#20
     methods.forEach(function (method) {
-      app[method.method]('/', handler(method, relativeUri))
+      app[method.method](path, params, handler(method, path))
     })
   }
 
   if (resources) {
-    app.use(createResources(resources, relativeUri, handler))
+    createResources(app, resources, path, handler)
   }
 
   return app
