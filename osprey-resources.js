@@ -1,9 +1,9 @@
-var router = require('osprey-router');
+var router = require('osprey-router')
 
 /**
  * Expose `ospreyResources`.
  */
-module.exports = ospreyResources;
+module.exports = ospreyResources
 
 /**
  * Accept resources and a handler function.
@@ -13,7 +13,7 @@ module.exports = ospreyResources;
  * @return {Function}
  */
 function ospreyResources (resources, handler) {
-  return createResources(resources, '', handler);
+  return createResources(resources, '', handler)
 }
 
 /**
@@ -24,20 +24,20 @@ function ospreyResources (resources, handler) {
  * @return {Function}
  */
 function createResources (resources, uri, handler) {
-  var app = router();
+  var app = router()
 
   if (!resources) {
-    return app;
+    return app
   }
 
   resources.forEach(function (resource) {
-    var path = resource.relativeUri;
-    var params = resource.uriParameters;
+    var path = resource.relativeUri
+    var params = resource.uriParameters
 
-    app.use(path, params, createResource(resource, uri, handler));
-  });
+    app.use(path, params, createResource(resource, uri, handler))
+  })
 
-  return app;
+  return app
 }
 
 /**
@@ -48,20 +48,20 @@ function createResources (resources, uri, handler) {
  * @return {Function}
  */
 function createResource (resource, uri, handler) {
-  var app = router();
-  var methods = resource.methods;
-  var resources = resource.resources;
-  var relativeUri = uri + (resource.relativeUri || '');
+  var app = router()
+  var methods = resource.methods
+  var resources = resource.resources
+  var relativeUri = uri + (resource.relativeUri || '')
 
   if (methods) {
     methods.forEach(function (method) {
-      app[method.method]('/', handler(method, relativeUri));
-    });
+      app[method.method]('/', handler(method, relativeUri))
+    })
   }
 
   if (resources) {
-    app.use(createResources(resources, relativeUri, handler));
+    app.use(createResources(resources, relativeUri, handler))
   }
 
-  return app;
+  return app
 }
