@@ -32,7 +32,7 @@ app.use(resources(
       }
     }]
   }],
-  function (method, url) {
+  function (method, path) {
     return function (req, res, next) {
       res.end('hello, world!')
     }
