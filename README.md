@@ -40,7 +40,7 @@ app.use(resources(
 ));
 ```
 
-The resources function accepts two arguments. The array of resources from RAML and a function that will generate the routes for that path.
+The resources function accepts two arguments. The array of resources from RAML and a function that will generate the route for that path. Return `null` if the route should not be used.
 
 ## License
 

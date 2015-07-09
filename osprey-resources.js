@@ -55,7 +55,12 @@ function createResource (app, resource, prefix, handler) {
   if (methods) {
     // TODO: Exit routers when handled: pillarjs/router#20
     methods.forEach(function (method) {
-      app[method.method](path, params, handler(method, path))
+      var handle = handler(method, path)
+
+      // Enable the ability to skip handlers by returning null.
+      if (handle != null) {
+        app[method.method](path, params, handle)
+      }
     })
   }
 

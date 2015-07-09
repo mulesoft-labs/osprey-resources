@@ -108,6 +108,43 @@ describe('osprey resources', function () {
       })
   })
 
+  it('should skip handlers that return null', function () {
+    var app = router()
+
+    app.use(resources([
+      {
+        relativeUri: '/users',
+        methods: [
+          {
+            method: 'get'
+          }
+        ],
+        resources: [
+          {
+            relativeUri: '/{userId}',
+            methods: [
+              {
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      }
+    ], function (method, path) {
+      return path === '/users' ? null : success()
+    }))
+
+    return Promise.all([
+      popsicle('/users').use(server(createServer(app))),
+      popsicle('/users/123').use(server(createServer(app)))
+    ])
+      .then(function (responses) {
+        expect(responses[0].status).to.equal(404)
+        expect(responses[1].status).to.equal(200)
+      })
+
+  })
+
   it.skip('should emit a single router without routes', function () {
     var app = router()
 
