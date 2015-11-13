@@ -5,6 +5,7 @@ var popsicle = require('popsicle')
 var server = require('popsicle-server')
 var router = require('osprey-router')
 var finalhandler = require('finalhandler')
+var Promise = require('native-or-bluebird')
 var resources = require('./')
 
 describe('osprey resources', function () {
