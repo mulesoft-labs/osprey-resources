@@ -53,13 +53,12 @@ function createResource (app, resource, prefix, handler) {
   var path = prefix + (resource.relativeUri || '')
 
   if (methods) {
-    // TODO: Exit routers when handled: pillarjs/router#20
     methods.forEach(function (method) {
       var handle = handler(method, path)
 
-      // Enable the ability to skip handlers by returning null.
+      // Enables the ability to skip a handler by returning null.
       if (handle != null) {
-        app[method.method](path, params, handle)
+        app[method.method](path, params, handle, exitRouter)
       }
     })
   }
@@ -69,4 +68,11 @@ function createResource (app, resource, prefix, handler) {
   }
 
   return app
+}
+
+/**
+ * Exit the router implementation.
+ */
+function exitRouter (req, res, next) {
+  return next('router')
 }

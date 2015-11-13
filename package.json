@@ -26,7 +26,6 @@
   "homepage": "https://github.com/mulesoft-labs/osprey-resources",
   "devDependencies": {
     "chai": "^3.0.0",
-    "es6-promise": "^2.0.1",
     "finalhandler": "^0.4.0",
     "istanbul": "^0.3.5",
     "mocha": "^2.1.0",

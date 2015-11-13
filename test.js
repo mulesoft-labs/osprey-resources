@@ -1,7 +1,5 @@
 /* global describe, it */
 
-require('es6-promise').polyfill()
-
 var expect = require('chai').expect
 var popsicle = require('popsicle')
 var server = require('popsicle-server')
@@ -142,13 +140,11 @@ describe('osprey resources', function () {
         expect(responses[0].status).to.equal(404)
         expect(responses[1].status).to.equal(200)
       })
-
   })
 
-  it.skip('should emit a single router without routes', function () {
+  it('should emit a single router to support `next(\'route\')`', function () {
     var app = router()
 
-    // It should always 404.
     app.use(resources([
       {
         relativeUri: '/users',
@@ -180,7 +176,45 @@ describe('osprey resources', function () {
     return popsicle('/users/new')
       .use(server(createServer(app)))
       .then(function (res) {
-        expect(res.status).to.equal(404)
+        expect(res.status).to.equal(200)
+        expect(res.body).to.equal('success')
+      })
+  })
+
+  it('should exit router after first handler', function () {
+    var app = router()
+
+    app.use(resources([
+      {
+        relativeUri: '/root',
+        methods: [
+          {
+            method: 'get'
+          }
+        ]
+      },
+      {
+        relativeUri: '/{id}',
+        methods: [
+          {
+            method: 'get'
+          }
+        ]
+      }
+    ], function (method, path) {
+      return function (req, res, next) {
+        req.hits = (req.hits + 1) || 1
+        return next()
+      }
+    }), function (req, res) {
+      res.end(String(req.hits))
+    })
+
+    return popsicle('/root')
+      .use(server(createServer(app)))
+      .then(function (res) {
+        expect(res.body).to.equal('1')
+        expect(res.status).to.equal(200)
       })
   })
 })
