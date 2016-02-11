@@ -37,6 +37,6 @@
     "standard": "^5.3.1"
   },
   "dependencies": {
-    "osprey-router": "^0.1.0"
+    "osprey-router": "^0.2.0"
   }
 }
