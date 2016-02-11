@@ -19,7 +19,7 @@ describe('osprey resources', function () {
       }]
     }], success))
 
-    return popsicle('/unknown')
+    return popsicle.request('/unknown')
       .use(server(createServer(app)))
       .then(function (res) {
         expect(res.status).to.equal(404)
@@ -52,7 +52,7 @@ describe('osprey resources', function () {
       }]
     }], success))
 
-    return popsicle('/users')
+    return popsicle.request('/users')
       .use(server(createServer(app)))
       .then(function (res) {
         expect(res.body).to.equal('success')
@@ -73,7 +73,7 @@ describe('osprey resources', function () {
       }]
     }], success))
 
-    return popsicle('/users/123')
+    return popsicle.request('/users/123')
       .use(server(createServer(app)))
       .then(function (res) {
         expect(res.body).to.equal('success')
@@ -100,7 +100,7 @@ describe('osprey resources', function () {
       }
     ], success))
 
-    return popsicle('/users/abc')
+    return popsicle.request('/users/abc')
       .use(server(createServer(app)))
       .then(function (res) {
         expect(res.status).to.equal(404)
@@ -134,8 +134,8 @@ describe('osprey resources', function () {
     }))
 
     return Promise.all([
-      popsicle('/users').use(server(createServer(app))),
-      popsicle('/users/123').use(server(createServer(app)))
+      popsicle.request('/users').use(server(createServer(app))),
+      popsicle.request('/users/123').use(server(createServer(app)))
     ])
       .then(function (responses) {
         expect(responses[0].status).to.equal(404)
@@ -174,7 +174,7 @@ describe('osprey resources', function () {
       } : success()
     }))
 
-    return popsicle('/users/new')
+    return popsicle.request('/users/new')
       .use(server(createServer(app)))
       .then(function (res) {
         expect(res.status).to.equal(200)
@@ -211,7 +211,7 @@ describe('osprey resources', function () {
       res.end(String(req.hits))
     })
 
-    return popsicle('/root')
+    return popsicle.request('/root')
       .use(server(createServer(app)))
       .then(function (res) {
         expect(res.body).to.equal('1')
