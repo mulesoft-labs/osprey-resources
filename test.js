@@ -182,6 +182,48 @@ describe('osprey resources', function () {
       })
   })
 
+  it('use uri parameters correctly', function () {
+    var app = router()
+
+    app.use(resources([
+      {
+        relativeUri: '/{userId}',
+        uriParameters: {
+          userId: {
+            type: 'integer'
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/files',
+            methods: [
+              {
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      }
+    ], function (method, path) {
+      return function (req, res) {
+        return res.end(req.url)
+      }
+    }))
+
+    return popsicle.request('/12345/files')
+      .use(server(createServer(app)))
+      .then(function (res) {
+        expect(res.status).to.equal(200)
+        expect(res.body).to.equal('/12345/files')
+      })
+      .then(function () {
+        return popsicle.request('/abcde/files').use(server(createServer(app)))
+      })
+      .then(function (res) {
+        expect(res.status).to.equal(404)
+      })
+  })
+
   it('should exit router after first handler', function () {
     var app = router()
 

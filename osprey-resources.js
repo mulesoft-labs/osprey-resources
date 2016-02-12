@@ -1,3 +1,4 @@
+var extend = require('xtend')
 var router = require('osprey-router')
 
 /**
@@ -13,7 +14,7 @@ module.exports = ospreyResources
  * @return {Function}
  */
 function ospreyResources (resources, handler) {
-  return createResources(router(), resources, '', handler)
+  return createResources(router(), resources, '', null, handler)
 }
 
 /**
@@ -22,17 +23,16 @@ function ospreyResources (resources, handler) {
  * @param  {Function} app
  * @param  {Array}    resources
  * @param  {String}   prefix
+ * @param  {Object}   params
  * @param  {Function} handler
  * @return {Function}
  */
-function createResources (app, resources, prefix, handler) {
-  if (!Array.isArray(resources)) {
-    return app
+function createResources (app, resources, prefix, params, handler) {
+  if (Array.isArray(resources)) {
+    resources.forEach(function (resource) {
+      createResource(app, resource, prefix, params, handler)
+    })
   }
-
-  resources.forEach(function (resource) {
-    createResource(app, resource, prefix, handler)
-  })
 
   return app
 }
@@ -43,13 +43,14 @@ function createResources (app, resources, prefix, handler) {
  * @param  {Function} app
  * @param  {Object}   resource
  * @param  {String}   prefix
+ * @param  {Object}   params
  * @param  {Function} handler
  * @return {Function}
  */
-function createResource (app, resource, prefix, handler) {
+function createResource (app, resource, prefix, params, handler) {
   var methods = resource.methods
   var resources = resource.resources
-  var params = resource.uriParameters
+  var uriParams = extend(params, resource.uriParameters)
   var path = prefix + (resource.relativeUri || '')
 
   if (methods) {
@@ -58,13 +59,13 @@ function createResource (app, resource, prefix, handler) {
 
       // Enables the ability to skip a handler by returning null.
       if (handle != null) {
-        app[method.method](path, params, handle, exitRouter)
+        app[method.method](path, uriParams, handle, exitRouter)
       }
     })
   }
 
   if (resources) {
-    createResources(app, resources, path, handler)
+    createResources(app, resources, path, uriParams, handler)
   }
 
   return app
