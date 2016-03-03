@@ -62,16 +62,28 @@ describe('osprey resources', function () {
 
   it('should support nested resources', function () {
     var app = router()
-
-    app.use(resources([{
+    var resourceHandler = resources([{
       relativeUri: '/users',
       resources: [{
         relativeUri: '/{userId}',
+        uriParameters: {
+          userId: {
+            type: 'number'
+          }
+        },
         methods: [{
           method: 'get'
         }]
       }]
-    }], success))
+    }], success)
+
+    app.use(resourceHandler)
+
+    expect(resourceHandler.ramlUriParameters).to.deep.equal({
+      userId: {
+        type: 'number'
+      }
+    })
 
     return popsicle.request('/users/123')
       .use(server(createServer(app)))
