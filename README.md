@@ -5,7 +5,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-Iterate over [RAML resources](https://github.com/raml-org/raml-spec/blob/master/raml-0.8.md#resources-and-nested-resources) and generate a middleware router.
+Iterate over [RAML resources](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#resources-and-nested-resources) and generate a middleware router.
 
 ## Installation
 
