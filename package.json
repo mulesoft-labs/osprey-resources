@@ -37,7 +37,7 @@
     "standard": "^8.3.0"
   },
   "dependencies": {
-    "osprey-router": "mulesoft-labs/osprey-router#raml1.0-fixes",
+    "osprey-router": "^0.5.1",
     "xtend": "^4.0.1"
   }
 }
