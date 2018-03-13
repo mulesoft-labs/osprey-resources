@@ -1,5 +1,7 @@
 # Osprey Resources
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/mulesoft-labs/osprey-resources.svg)](https://greenkeeper.io/)
+
 [![NPM version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Build status][travis-image]][travis-url]
