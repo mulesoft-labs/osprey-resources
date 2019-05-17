@@ -1,11 +1,10 @@
 # Osprey Resources
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/mulesoft-labs/osprey-resources.svg)](https://greenkeeper.io/)
-
 [![NPM version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
+[![Greenkeeper badge](https://badges.greenkeeper.io/mulesoft-labs/osprey-resources.svg)](https://greenkeeper.io/)
 
 Iterate over [RAML resources](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#resources-and-nested-resources) and generate a middleware router.
 

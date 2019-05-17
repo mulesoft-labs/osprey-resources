@@ -37,7 +37,7 @@
     "standard": "^12.0.1"
   },
   "dependencies": {
-    "osprey-router": "^0.6.1",
+    "osprey-router": "^0.6.2",
     "xtend": "^4.0.1"
   }
 }
