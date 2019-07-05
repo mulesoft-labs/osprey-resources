@@ -1,12 +1,50 @@
 /* global describe, it */
 
 var expect = require('chai').expect
-var popsicle = require('popsicle')
-var server = require('popsicle-server')
 var router = require('osprey-router')
-var finalhandler = require('finalhandler')
 var Promise = require('any-promise')
 var resources = require('./')
+
+/* Helps using popsicle-server with popsicle version 12+.
+ *
+ * Inspired by popsicle 12.0+ code.
+ */
+function makeFetcher (app) {
+  var compose = require('throwback').compose
+  var Request = require('servie').Request
+  var popsicle = require('popsicle')
+  var popsicleServer = require('popsicle-server')
+  var finalhandler = require('finalhandler')
+
+  // Set response text to "body" property to mimic popsicle v10
+  // response interface.
+
+  function responseBodyMiddleware (req, next) {
+    return next().then(res => {
+      return res.text().then(body => {
+        res.body = body
+        return res
+      })
+    })
+  }
+
+  function createServer (router) {
+    return function (req, res) {
+      router(req, res, finalhandler(req, res))
+    }
+  }
+
+  var popsicleServerMiddleware = popsicleServer(createServer(app))
+  var middleware = compose([
+    responseBodyMiddleware,
+    popsicleServerMiddleware,
+    popsicle.middleware
+  ])
+
+  return {
+    fetch: popsicle.toFetch(middleware, Request)
+  }
+}
 
 describe('osprey resources', function () {
   it('should reject undefined resources', function () {
@@ -19,8 +57,9 @@ describe('osprey resources', function () {
       }]
     }], success))
 
-    return popsicle.request('/unknown')
-      .use(server(createServer(app)))
+    return makeFetcher(app).fetch('/unknown', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.status).to.equal(404)
       })
@@ -52,8 +91,9 @@ describe('osprey resources', function () {
       }]
     }], success))
 
-    return popsicle.request('/users')
-      .use(server(createServer(app)))
+    return makeFetcher(app).fetch('/users', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.body).to.equal('success')
         expect(res.status).to.equal(200)
@@ -85,8 +125,9 @@ describe('osprey resources', function () {
       }
     })
 
-    return popsicle.request('/users/123')
-      .use(server(createServer(app)))
+    return makeFetcher(app).fetch('/users/123', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.body).to.equal('success')
         expect(res.status).to.equal(200)
@@ -112,8 +153,9 @@ describe('osprey resources', function () {
       }
     ], success))
 
-    return popsicle.request('/users/abc')
-      .use(server(createServer(app)))
+    return makeFetcher(app).fetch('/users/abc', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.status).to.equal(404)
       })
@@ -146,8 +188,12 @@ describe('osprey resources', function () {
     }))
 
     return Promise.all([
-      popsicle.request('/users').use(server(createServer(app))),
-      popsicle.request('/users/123').use(server(createServer(app)))
+      makeFetcher(app).fetch('/users', {
+        method: 'GET'
+      }),
+      makeFetcher(app).fetch('/users/123', {
+        method: 'GET'
+      })
     ])
       .then(function (responses) {
         expect(responses[0].status).to.equal(404)
@@ -186,8 +232,9 @@ describe('osprey resources', function () {
       } : success()
     }))
 
-    return popsicle.request('/users/new')
-      .use(server(createServer(app)))
+    return makeFetcher(app).fetch('/users/new', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.status).to.equal(200)
         expect(res.body).to.equal('success')
@@ -222,14 +269,17 @@ describe('osprey resources', function () {
       }
     }))
 
-    return popsicle.request('/12345/files')
-      .use(server(createServer(app)))
+    return makeFetcher(app).fetch('/12345/files', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.status).to.equal(200)
         expect(res.body).to.equal('/12345/files')
       })
       .then(function () {
-        return popsicle.request('/abcde/files').use(server(createServer(app)))
+        return makeFetcher(app).fetch('/abcde/files', {
+          method: 'GET'
+        })
       })
       .then(function (res) {
         expect(res.status).to.equal(404)
@@ -265,20 +315,15 @@ describe('osprey resources', function () {
       res.end(String(req.hits))
     })
 
-    return popsicle.request('/root')
-      .use(server(createServer(app)))
+    return makeFetcher(app).fetch('/root', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.body).to.equal('1')
         expect(res.status).to.equal(200)
       })
   })
 })
-
-function createServer (router) {
-  return function (req, res) {
-    return router(req, res, finalhandler(req, res))
-  }
-}
 
 function success () {
   return function (req, res) {
