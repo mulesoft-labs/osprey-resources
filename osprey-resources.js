@@ -1,5 +1,4 @@
-var extend = require('xtend')
-var router = require('osprey-router')
+const router = require('osprey-router')
 
 /**
  * Expose `ospreyResources`.
@@ -7,33 +6,30 @@ var router = require('osprey-router')
 module.exports = ospreyResources
 
 /**
- * Accept resources and a handler function.
+ * Accept endpoints and a handler function.
  *
- * @param  {Array}    resources
+ * @param  {Array<webapi-parser.EndPoint>} endpoints
  * @param  {Function} handler
  * @return {Function}
  */
-function ospreyResources (resources, handler) {
-  return createResources(router(), resources, '', null, handler)
+function ospreyResources (endpoints, handler) {
+  return createResources(router(), endpoints, handler)
 }
 
 /**
- * Create a middleware router that handles the resource.
+ * Create a middleware router that handles a resource.
  *
  * @param  {Function} app
- * @param  {Array}    resources
- * @param  {String}   prefix
- * @param  {Object}   params
+ * @param  {Array<webapi-parser.EndPoint>} endpoints
  * @param  {Function} handler
  * @return {Function}
  */
-function createResources (app, resources, prefix, params, handler) {
-  if (Array.isArray(resources)) {
-    resources.forEach(function (resource) {
-      createResource(app, resource, prefix, params, handler)
+function createResources (app, endpoints, handler) {
+  if (Array.isArray(endpoints)) {
+    endpoints.forEach(endpoint => {
+      createResource(app, endpoint, handler)
     })
   }
-
   return app
 }
 
@@ -41,33 +37,23 @@ function createResources (app, resources, prefix, params, handler) {
  * Create middleware for a single RAML resource and recursively nest children.
  *
  * @param  {Function} app
- * @param  {Object}   resource
- * @param  {String}   prefix
- * @param  {Object}   params
+ * @param  {webapi-parser.EndPoint} endpoint
  * @param  {Function} handler
  * @return {Function}
  */
-function createResource (app, resource, prefix, params, handler) {
-  var methods = resource.methods
-  var resources = resource.resources
-  var uriParams = extend(params, resource.uriParameters)
-  var path = prefix + (resource.relativeUri || '')
+function createResource (app, endpoint, handler) {
+  const methods = endpoint.operations || []
+  const path = endpoint.path.value()
 
-  if (methods) {
-    methods.forEach(function (method) {
-      var handle = handler(method, path)
+  methods.forEach(method => {
+    const handle = handler(method, path)
 
-      // Enables the ability to skip a handler by returning null.
-      if (handle != null) {
-        app[method.method](path, uriParams, handle, exitRouter)
-      }
-    })
-  }
-
-  if (resources) {
-    createResources(app, resources, path, uriParams, handler)
-  }
-
+    // Enables the ability to skip a handler by returning null.
+    if (handle) {
+      app[method.method.value()](
+        path, endpoint.parameters, handle, exitRouter)
+    }
+  })
   return app
 }
 
