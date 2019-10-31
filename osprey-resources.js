@@ -46,6 +46,9 @@ function createResource (app, endpoint, handler) {
   const path = endpoint.path.value()
 
   methods.forEach(method => {
+    // Make method name lowercase so it matches names from
+    // osprey-router.
+    method.withMethod(method.method.value().toLowerCase())
     const handle = handler(method, path)
 
     // Enables the ability to skip a handler by returning null.

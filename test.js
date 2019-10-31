@@ -1,20 +1,22 @@
-/* global describe, it */
+/* global describe, it, before */
 
-var expect = require('chai').expect
-var router = require('osprey-router')
-var Promise = require('any-promise')
-var resources = require('./')
+const expect = require('chai').expect
+const router = require('osprey-router')
+const Promise = require('any-promise')
+const wp = require('webapi-parser')
+
+const ospreyResources = require('./')
 
 /* Helps using popsicle-server with popsicle version 12+.
  *
  * Inspired by popsicle 12.0+ code.
  */
 function makeFetcher (app) {
-  var compose = require('throwback').compose
-  var Request = require('servie').Request
-  var popsicle = require('popsicle')
-  var popsicleServer = require('popsicle-server')
-  var finalhandler = require('finalhandler')
+  const compose = require('throwback').compose
+  const Request = require('servie').Request
+  const popsicle = require('popsicle')
+  const popsicleServer = require('popsicle-server')
+  const finalhandler = require('finalhandler')
 
   // Set response text to "body" property to mimic popsicle v10
   // response interface.
@@ -34,8 +36,8 @@ function makeFetcher (app) {
     }
   }
 
-  var popsicleServerMiddleware = popsicleServer(createServer(app))
-  var middleware = compose([
+  const popsicleServerMiddleware = popsicleServer(createServer(app))
+  const middleware = compose([
     responseBodyMiddleware,
     popsicleServerMiddleware,
     popsicle.middleware
@@ -46,16 +48,22 @@ function makeFetcher (app) {
   }
 }
 
+before(async function () {
+  await wp.WebApiParser.init()
+})
+
 describe('osprey resources', function () {
   it('should reject undefined resources', function () {
-    var app = router()
-
-    app.use(resources([{
-      relativeUri: '/users',
-      methods: [{
-        method: 'get'
-      }]
-    }], success))
+    const app = router()
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/users')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ])
+    ]
+    app.use(ospreyResources(endpoints, success))
 
     return makeFetcher(app).fetch('/unknown', {
       method: 'GET'
@@ -66,14 +74,17 @@ describe('osprey resources', function () {
   })
 
   it('should receive path', function (done) {
-    resources([{
-      relativeUri: '/users',
-      methods: [{
-        method: 'post'
-      }]
-    }], function (method, path) {
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/users')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('POST')
+        ])
+    ]
+    ospreyResources(endpoints, function (method, path) {
       expect(path).to.equal('/users')
-      expect(method.method).to.equal('post')
+      expect(method.method.value()).to.equal('post')
 
       done()
 
@@ -82,14 +93,16 @@ describe('osprey resources', function () {
   })
 
   it('should accept defined resources', function () {
-    var app = router()
-
-    app.use(resources([{
-      relativeUri: '/users',
-      methods: [{
-        method: 'get'
-      }]
-    }], success))
+    const app = router()
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/users')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ])
+    ]
+    app.use(ospreyResources(endpoints, success))
 
     return makeFetcher(app).fetch('/users', {
       method: 'GET'
@@ -101,27 +114,37 @@ describe('osprey resources', function () {
   })
 
   it('should support nested resources', function () {
-    var app = router()
-    var resourceHandler = resources([{
-      relativeUri: '/users',
-      resources: [{
-        relativeUri: '/{userId}',
-        uriParameters: {
-          userId: {
-            type: 'number'
-          }
-        },
-        methods: [{
-          method: 'get'
-        }]
-      }]
-    }], success)
+    const app = router()
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/users'),
+      new wp.model.domain.EndPoint()
+        .withPath('/users/{userId}')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ])
+        .withParameters([
+          new wp.model.domain.Parameter()
+            .withName('userId')
+            .withRequired(true)
+            .withSchema(
+              new wp.model.domain.ScalarShape()
+                .withName('schema')
+                .withDataType('http://www.w3.org/2001/XMLSchema#number'))
+        ])
+    ]
+
+    const resourceHandler = ospreyResources(endpoints, success)
 
     app.use(resourceHandler)
 
     expect(resourceHandler.ramlUriParameters).to.deep.equal({
       userId: {
-        type: 'number'
+        displayName: 'userId',
+        name: 'userId',
+        required: true,
+        type: ['number']
       }
     })
 
@@ -135,23 +158,26 @@ describe('osprey resources', function () {
   })
 
   it('should use uri parameters', function () {
-    var app = router()
+    const app = router()
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/users/{userId}')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ])
+        .withParameters([
+          new wp.model.domain.Parameter()
+            .withName('userId')
+            .withRequired(true)
+            .withSchema(
+              new wp.model.domain.ScalarShape()
+                .withName('schema')
+                .withDataType('http://www.w3.org/2001/XMLSchema#number'))
+        ])
+    ]
 
-    app.use(resources([
-      {
-        relativeUri: '/users/{userId}',
-        uriParameters: {
-          userId: {
-            type: 'number'
-          }
-        },
-        methods: [
-          {
-            method: 'get'
-          }
-        ]
-      }
-    ], success))
+    app.use(ospreyResources(endpoints, success))
 
     return makeFetcher(app).fetch('/users/abc', {
       method: 'GET'
@@ -162,28 +188,23 @@ describe('osprey resources', function () {
   })
 
   it('should skip handlers that return null', function () {
-    var app = router()
+    const app = router()
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/users')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ]),
+      new wp.model.domain.EndPoint()
+        .withPath('/users/{userId}')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ])
+    ]
 
-    app.use(resources([
-      {
-        relativeUri: '/users',
-        methods: [
-          {
-            method: 'get'
-          }
-        ],
-        resources: [
-          {
-            relativeUri: '/{userId}',
-            methods: [
-              {
-                method: 'get'
-              }
-            ]
-          }
-        ]
-      }
-    ], function (method, path) {
+    app.use(ospreyResources(endpoints, function (method, path) {
       return path === '/users' ? null : success()
     }))
 
@@ -202,31 +223,25 @@ describe('osprey resources', function () {
   })
 
   it('should emit a single router to support `next(\'route\')`', function () {
-    var app = router()
+    const app = router()
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/users'),
+      new wp.model.domain.EndPoint()
+        .withPath('/users/{userId}')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ]),
+      new wp.model.domain.EndPoint()
+        .withPath('/users/new')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ])
+    ]
 
-    app.use(resources([
-      {
-        relativeUri: '/users',
-        resources: [
-          {
-            relativeUri: '/{userId}',
-            methods: [
-              {
-                method: 'get'
-              }
-            ]
-          },
-          {
-            relativeUri: '/new',
-            methods: [
-              {
-                method: 'get'
-              }
-            ]
-          }
-        ]
-      }
-    ], function (method, path) {
+    app.use(ospreyResources(endpoints, function (method, path) {
       return path === '/users/{userId}' ? function (req, res, next) {
         return next('route')
       } : success()
@@ -242,28 +257,37 @@ describe('osprey resources', function () {
   })
 
   it('use uri parameters correctly', function () {
-    var app = router()
+    const app = router()
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/{userId}')
+        .withParameters([
+          new wp.model.domain.Parameter()
+            .withName('userId')
+            .withRequired(true)
+            .withSchema(
+              new wp.model.domain.ScalarShape()
+                .withName('schema')
+                .withDataType('http://www.w3.org/2001/XMLSchema#integer'))
+        ]),
+      new wp.model.domain.EndPoint()
+        .withPath('/{userId}/files')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ])
+        .withParameters([
+          new wp.model.domain.Parameter()
+            .withName('userId')
+            .withRequired(true)
+            .withSchema(
+              new wp.model.domain.ScalarShape()
+                .withName('schema')
+                .withDataType('http://www.w3.org/2001/XMLSchema#integer'))
+        ])
+    ]
 
-    app.use(resources([
-      {
-        relativeUri: '/{userId}',
-        uriParameters: {
-          userId: {
-            type: 'integer'
-          }
-        },
-        resources: [
-          {
-            relativeUri: '/files',
-            methods: [
-              {
-                method: 'get'
-              }
-            ]
-          }
-        ]
-      }
-    ], function (method, path) {
+    app.use(ospreyResources(endpoints, function (method, path) {
       return function (req, res) {
         return res.end(req.url)
       }
@@ -287,26 +311,23 @@ describe('osprey resources', function () {
   })
 
   it('should exit router after first handler', function () {
-    var app = router()
+    const app = router()
+    const endpoints = [
+      new wp.model.domain.EndPoint()
+        .withPath('/root')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ]),
+      new wp.model.domain.EndPoint()
+        .withPath('/{id}')
+        .withOperations([
+          new wp.model.domain.Operation()
+            .withMethod('GET')
+        ])
+    ]
 
-    app.use(resources([
-      {
-        relativeUri: '/root',
-        methods: [
-          {
-            method: 'get'
-          }
-        ]
-      },
-      {
-        relativeUri: '/{id}',
-        methods: [
-          {
-            method: 'get'
-          }
-        ]
-      }
-    ], function (method, path) {
+    app.use(ospreyResources(endpoints, function (method, path) {
       return function (req, res, next) {
         req.hits = (req.hits + 1) || 1
         return next()
