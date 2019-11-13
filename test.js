@@ -131,7 +131,7 @@ describe('osprey resources', function () {
             .withSchema(
               new wp.model.domain.ScalarShape()
                 .withName('schema')
-                .withDataType('http://www.w3.org/2001/XMLSchema#number'))
+                .withDataType('http://a.ml/vocabularies/shapes#number'))
         ])
     ]
 
@@ -173,7 +173,7 @@ describe('osprey resources', function () {
             .withSchema(
               new wp.model.domain.ScalarShape()
                 .withName('schema')
-                .withDataType('http://www.w3.org/2001/XMLSchema#number'))
+                .withDataType('http://a.ml/vocabularies/shapes#number'))
         ])
     ]
 
