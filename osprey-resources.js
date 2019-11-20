@@ -8,8 +8,8 @@ module.exports = ospreyResources
 /**
  * Accept endpoints and a handler function.
  *
- * @param  {Array<webapi-parser.EndPoint>} endpoints
- * @param  {Function} handler
+ * @param  {Array.<webapi-parser.EndPoint>} endpoints
+ * @param  {Function}                       handler
  * @return {Function}
  */
 function ospreyResources (endpoints, handler) {
@@ -19,9 +19,9 @@ function ospreyResources (endpoints, handler) {
 /**
  * Create a middleware router that handles a resource.
  *
- * @param  {Function} app
- * @param  {Array<webapi-parser.EndPoint>} endpoints
- * @param  {Function} handler
+ * @param  {Function}                       app
+ * @param  {Array.<webapi-parser.EndPoint>} endpoints
+ * @param  {Function}                       handler
  * @return {Function}
  */
 function createResources (app, endpoints, handler) {
@@ -36,9 +36,9 @@ function createResources (app, endpoints, handler) {
 /**
  * Create middleware for a single RAML resource and recursively nest children.
  *
- * @param  {Function} app
+ * @param  {Function}               app
  * @param  {webapi-parser.EndPoint} endpoint
- * @param  {Function} handler
+ * @param  {Function}               handler
  * @return {Function}
  */
 function createResource (app, endpoint, handler) {
