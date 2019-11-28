@@ -1,4 +1,4 @@
-/* global describe, it, before */
+/* global describe, it, beforeEach */
 
 const expect = require('chai').expect
 const router = require('osprey-router')
@@ -48,7 +48,7 @@ function makeFetcher (app) {
   }
 }
 
-before(async function () {
+beforeEach(async function () {
   await wp.WebApiParser.init()
 })
 
@@ -137,16 +137,10 @@ describe('osprey resources', function () {
 
     const resourceHandler = ospreyResources(endpoints, success)
 
+    expect(resourceHandler.ramlUriParameters.length).to.equal(1)
+    expect(resourceHandler.ramlUriParameters[0].name.value())
+      .to.equal('userId')
     app.use(resourceHandler)
-
-    expect(resourceHandler.ramlUriParameters).to.deep.equal({
-      userId: {
-        displayName: 'userId',
-        name: 'userId',
-        required: true,
-        type: ['number']
-      }
-    })
 
     return makeFetcher(app).fetch('/users/123', {
       method: 'GET'
@@ -193,14 +187,12 @@ describe('osprey resources', function () {
       new wp.model.domain.EndPoint()
         .withPath('/users')
         .withOperations([
-          new wp.model.domain.Operation()
-            .withMethod('GET')
+          new wp.model.domain.Operation().withMethod('GET')
         ]),
       new wp.model.domain.EndPoint()
         .withPath('/users/{userId}')
         .withOperations([
-          new wp.model.domain.Operation()
-            .withMethod('GET')
+          new wp.model.domain.Operation().withMethod('GET')
         ])
     ]
 
@@ -230,14 +222,12 @@ describe('osprey resources', function () {
       new wp.model.domain.EndPoint()
         .withPath('/users/{userId}')
         .withOperations([
-          new wp.model.domain.Operation()
-            .withMethod('GET')
+          new wp.model.domain.Operation().withMethod('GET')
         ]),
       new wp.model.domain.EndPoint()
         .withPath('/users/new')
         .withOperations([
-          new wp.model.domain.Operation()
-            .withMethod('GET')
+          new wp.model.domain.Operation().withMethod('GET')
         ])
     ]
 
