@@ -14,7 +14,7 @@ module.exports = ospreyResources
  * @return {Function}
  */
 function ospreyResources (resources, handler) {
-  return createResources(router(), resources, '', null, handler)
+  return createResources(router({ RAMLVersion: 'RAML10' }), resources, '', null, handler)
 }
 
 /**
