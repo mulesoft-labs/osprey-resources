@@ -40,6 +40,6 @@
     "webapi-parser": "^0.4.0"
   },
   "dependencies": {
-    "osprey-router": "^0.6.2"
+    "osprey-router": "mulesoft-labs/osprey-router#rework_webapi_parser"
   }
 }
