@@ -17,31 +17,26 @@ npm install osprey-resources --save
 ## Usage
 
 ```js
-var express = require('express');
-var resources = require('osprey-resources');
-var app = express();
+const express = require('express')
+const resources = require('osprey-resources')
+const utils = require('./utils')
+
+const app = express()
+
+// Array.<webapi-parser.EndPoint>
+const endPoints = utils.getEndPoints()
 
 app.use(resources(
-  [{
-    relativeUri: '/users',
-    methods: [{
-      method: 'post',
-      body: {
-        'application/json': {
-          schema: '...'
-        }
-      }
-    }]
-  }],
+  endPoints,
   function (method, path) {
     return function (req, res, next) {
       res.end('hello, world!')
     }
   }
-));
+))
 ```
 
-The resources function accepts two arguments. The array of resources from RAML and a function that will generate the route for that path. Return `null` if the route should not be used.
+The resources function accepts two arguments. The array of `EndPoint` objects from [webapi-parser](https://github.com/raml-org/webapi-parser) model and a function that will generate the route for that path. Return `null` if the route should not be used.
 
 ## License
 
