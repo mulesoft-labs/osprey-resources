@@ -37,7 +37,7 @@
     "standard": "^14.3.1",
     "test-exclude": "^5.2.3",
     "throwback": "^4.1.0",
-    "webapi-parser": "^0.5.0"
+    "webapi-parser": "^0.4.1"
   },
   "dependencies": {
     "osprey-router": "^0.6.3"
