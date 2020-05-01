@@ -31,8 +31,8 @@
     "finalhandler": "^1.1.1",
     "mocha": "^7.1.2",
     "nyc": "^15.0.1",
-    "popsicle": "12.0.4",
-    "popsicle-server": "^2.0.0",
+    "popsicle": "^12.0.5",
+    "popsicle-server": "^3.0.0",
     "pre-commit": "^1.0.5",
     "standard": "^14.3.3",
     "throwback": "^4.1.0"
