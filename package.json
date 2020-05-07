@@ -38,7 +38,7 @@
     "throwback": "^4.1.0"
   },
   "dependencies": {
-    "osprey-router": "^0.6.2",
+    "osprey-router": "^0.7.0",
     "xtend": "^4.0.1"
   }
 }
