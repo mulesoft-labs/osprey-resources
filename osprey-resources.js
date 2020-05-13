@@ -13,8 +13,8 @@ module.exports = ospreyResources
  * @param  {Function} handler
  * @return {Function}
  */
-function ospreyResources (resources, handler) {
-  return createResources(router(), resources, '', null, handler)
+function ospreyResources(resources, handler, routerOpts) {
+  return createResources(router(routerOpts), resources, '', null, handler);
 }
 
 /**
