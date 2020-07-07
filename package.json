@@ -26,19 +26,20 @@
   "homepage": "https://github.com/mulesoft-labs/osprey-resources",
   "devDependencies": {
     "any-promise": "^1.1.0",
-    "bluebird": "^3.7.1",
+    "bluebird": "^3.7.2",
     "chai": "^4.1.2",
     "finalhandler": "^1.1.2",
+    "mocha": "^8.0.1",
+    "nyc": "^15.1.0",
     "popsicle": "^12.0.5",
     "popsicle-server": "^3.0.0",
     "pre-commit": "^1.0.5",
-    "webapi-parser": "^0.4.1",
-    "mocha": "^7.1.2",
-    "nyc": "^15.0.1",
-    "standard": "^14.3.3",
-    "throwback": "^4.1.0"
+    "standard": "^14.3.4",
+    "throwback": "^4.1.0",
+    "webapi-parser": "^0.4.1"
   },
   "dependencies": {
-    "osprey-router": "^0.6.3"
+    "mmocha": "^1.0.0",
+    "osprey-router": "^0.7.1"
   }
 }
