@@ -1,6 +1,6 @@
 {
   "name": "osprey-resources",
-  "version": "0.8.3",
+  "version": "0.9.1",
   "description": "Automatically support RAML resources",
   "main": "osprey-resources.js",
   "files": [
@@ -39,7 +39,6 @@
     "webapi-parser": "^0.4.1"
   },
   "dependencies": {
-    "mmocha": "^1.0.0",
     "osprey-router": "^0.7.1"
   }
 }
