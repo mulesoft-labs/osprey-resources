@@ -39,6 +39,6 @@
     "webapi-parser": "^0.4.1"
   },
   "dependencies": {
-    "osprey-router": "^0.7.1"
+    "osprey-router": "^1.0.0"
   }
 }
